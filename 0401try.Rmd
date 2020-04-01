@@ -1,7 +1,7 @@
 ---
-title: '0311'
-author: "astrid"
-date: "2020/3/11"
+title: "0401TRY"
+author: "Astrid"
+date: "2020/4/1"
 output: html_document
 ---
 
@@ -28,10 +28,3 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-```{r}
-library(googlesheets4)
-```
-```{r}
-install.packages(c("googlesheets4","tidyverse"))
-```
-
