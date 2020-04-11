@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1586337253125.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "4818CAE0",
+    "lastKnownWriteTime" : 1586335934,
+    "last_content_update" : 1586337253125,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "id" : "a9567db554c64734b1efdd579890bd48",
+        "name" : "tainanSportsMap",
+        "title" : "tainanSportsMap"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "object_explorer"
+}

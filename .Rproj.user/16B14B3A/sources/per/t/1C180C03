@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1586444405462.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "1C180C03",
+    "lastKnownWriteTime" : 1586443484,
+    "last_content_update" : 1586444405462,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "id" : "1c72813bf77f437bbfbb87181ada5cab",
+        "name" : "newTaipeiCityVaccine",
+        "title" : "newTaipeiCityVaccine"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "object_explorer"
+}
