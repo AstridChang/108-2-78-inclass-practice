@@ -365,3 +365,16 @@ githubCommit[[3]][["commit"]][["committer"]][-c(2)] -> githubCommit[[3]][["commi
 githubCommit[[3]][["commit"]][["committer"]]
 ```
 
+```{r}
+library(jsonlite)
+fromJSON("https://data.ntpc.gov.tw/od/data/api/54DDDC93-589C-4858-9C95-18B2046CC1FC?$format=json", simplifyDataFrame = F) -> newTaipeiYouBike
+```
+
+```{r}
+#刪除汐止區公所
+newTaipeiYouBike[[3]][-c(2)] -> newTaipeiYouBike
+str(newTaipeiYouBike)
+newTaipeiYouBike[[3]][[2]] <- NULL
+str(newTaipeiYouBike)
+```
+
