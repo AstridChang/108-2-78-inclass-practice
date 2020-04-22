@@ -324,6 +324,19 @@ list1 <-
       name="Jack",
       birthday=ymd("1998-03-21"),
       status=c(height=177, weight=80)
+    )
+  )
+str(list1)
+```
+
+```{r}
+library(lubridate)
+list1 <- 
+  list(
+    list(
+      name="Jack",
+      birthday=ymd("1998-03-21"),
+      status=c(height=177, weight=80)
     ),
     list(
       name="Mary",
