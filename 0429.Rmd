@@ -5,6 +5,7 @@ date: "2020/5/2"
 output: html_document
 ---
 
+### 4.3 On numeric class
 # 加、減、乘、除： +, -, *, /
 ```{r}
 a <- c(2, 3, 5)
@@ -88,7 +89,7 @@ paste0(
 )
 ```
 
-# 4.4 Relational Operators
+### 4.4 Relational Operators
 # 這節在介紹產生「要/不要」向量的常見手法。
 
 ```{r}
@@ -104,7 +105,7 @@ example <- list(
 )
 ```
 
-# 4.4.1 比較
+### 4.4.1 比較
 >,<,<=,>=: 分別為大於、小於、小於等於、大於等於
 數字比較
 時間比較
@@ -223,16 +224,28 @@ print(example[c("name","allowance")])
 
 pick_allowanceOver1000 <- example$allowance >= "1001-2000"
 example$name[pick_allowanceOver1000]
+# 會產生，但不是我們要的
+# 類別資料比大小是沒有意義的，因為這裡沒有排序，可排序才可以比
+# 在下方練習執行ordered後就不會再出現警訊
 ```
 
 # factor資料可進一步分成可排序，與不可排序的，如：
-* 可排序： 以年齡層區分的類別，以所得級距區分的類別等。
+* 可排序： 以年齡層區分的類別，以所得級距區分的類別等。(記得做額外設定)
 * 不排序： 性別，學系等。
 
 factor的設定在不調整時內定為不可排序資料，如要改成可排序類別資料，以先前已處理好的example$allowance 為例：
+
+```{r}
+levels(example$allowance)
+```
+
 ```{r}
 example$allowance <- 
-  ordered(example$allowance)
+  ordered(example$allowance) #ordered代表可排序
+```
+
+```{r}
+class(example$allowance)
 ```
 
 # 或在設定為factor時即把levels排好，並ordered=T:
@@ -242,6 +255,16 @@ example$allowance <-
     example$allowance,
     levels=c("0-1000", "1001-2000", "2000+"),
     ordered = T # 設定為可排序factor
+  )
+```
+
+```{r}
+#上面的自己打一次
+example$allowance <- 
+  factor(
+    c("0-1000","1001-2000","2000+","1001-2000"),
+    levels = c("0-1000","1001-2000","2000+"),
+    ordered = T #設定為可排序FACTOR
   )
 ```
 
@@ -259,8 +282,297 @@ jsonlite::fromJSON("https://www.dropbox.com/s/3uijub7xheib405/list_victimAges_fe
 ```{r}
 str(list_victimAges_female)
 View(list_victimAges_female$`數目`)
-sum(list_victimAges_female$`數目`)
-sum(list_victimAges_female$`數目`, na.rm=T)
+sum(list_victimAges_female$`數目`) #出現NA(not available)
+sum(list_victimAges_female$`數目`, na.rm=T) #rm=remove
+```
+
+# 請將list_victimAges_female各元素的class做合理設定。
+```{r}
+list_victimAges_female$數目 <-
+  as.integer(list_victimAges_female$數目)
+list_victimAges_female$年齡層 <- 
+  as.factor(list_victimAges_female$年齡層)
+```
+
+```{r}
+levels(list_victimAges_female$年齡層) -> levels_ages
+print(levels_ages)
+```
+
+# 將levels順序改成: 不詳，總計，0_5歲，12_17歲，…，70歲以上。
+```{r}
+# 情境
+sum(list_victimAges_female$數目, na.rm=T)
+sum(list_victimAges_female$數目[pick_above30], na.rm = T)
+```
+
+# 可選出「30_39歲以上受害者」的「要/不要」向量：
+```{r}
+# 先將類別資料設定成可排序類別資料
+list_victimAges_female$年齡層 <-
+  ordered(list_victimAges_female$年齡層)
+pick_above30 <- 
+  list_victimAges_female$年齡層 >= "30_39歲"
+```
+
+# 選出「30_39歲以上受害者」的數目
+```{r}
+sum(list_victimAges_female$數目, na.rm=T)
+sum(list_victimAges_female$數目[pick_above30], na.rm = T)
+```
+### 4.4.2 相等，屬於
+==: 等於
+
+!=: 不等於
+
+==與!=可使用於字串
+
+# example裡誰血型B型
+```{r}
+print(example[c("name","bloodType")])
+
+pick_bloodB <- example$bloodType == "B"
+example$name[pick_bloodB]
+# 創造可留下偶數的「要/不要」向量pick_evens。
+```
+
+# 創造可留下偶數的「要/不要」向量pick_evens。
+```{r}
+sequenceNums <- c(11, 6, 8, 11, 12, 11, 3, 7, 10, 8)
+
+pick_evens <- (sequenceNums %% 2) == 0
+sequenceNums[pick_evens]
+```
+
+# 還有一個常用的關聯運算：
+
+#  %in%: 屬於
+左邊元素「一一」檢視是不是屬於右邊元素集合。
+```{r}
+x <- c(1,5,8)
+y <- c(5,8)
+
+# x裡的元素值是不是屬於y集合
+x %in% y
+```
+
+# example裡誰來自大台北
+```{r}
+print(example[c("name","residence")])
+
+set_TaipeiMetro <- c("Taipei","New Taipei")
+pick_fromTaipeiMetro <- example$residence %in% set_TaipeiMetro
+example$name[pick_fromTaipeiMetro]
+```
+
+```{r}
+str(transcript100to103)
+
+```
+```{r}
+#檢查名稱，避免因為命名不統一而出錯
+levels(factor(transcript100to103$`學院`))
+
+unique(transcript100to103$`學院`)
+```
+
+# 創造 可選出來自法商學院的「要/不要」向量，pick_lawBusiness。
+```{r}
+set_LawBusiness <- c(
+  "法學院","商學院"
+)
+pick_LawBusiness <-
+  transcript100to103$`學院` %in%
+  set_LawBusiness
+```
+
+### 4.4.3 Negation(否定用法)
+# 在「要/不要」向量前加上!會成為否定句的「要/不要」向量，元素裡的TRUE會轉成FALSE, FALSE則轉成TRUE。
+```{r}
+pick_not_fromTaipeiMetro <- ! pick_fromTaipeiMetro
+# 或
+pick_not_fromTaipeiMetro <- !(example$residence %in% set_TaipeiMetro) # (..) 裡面會先運算完才做外面!的處理
+```
+
+
+```{r}
+print(example[c("name","residence")])
+
+example$name[pick_fromTaipeiMetro]
+example$name[pick_not_fromTaipeiMetro]
+```
+
+##3 4.4.4 資料狀態
+is.na: 有缺失
+
+is.{class/type name}: is.integer, is.character, is.factor … etc
+
+```{r}
+# 有時資料有缺失，在R裡會記成NA(即not available)如下例：
+x2 <- c(1,NA,10)
+y2 <- c(-1,NA,20)
+
+x3 <- c(NA,"小花") #NA是特殊符號，不用加引號
+y3 <- c(NA,"小華")
+```
+
+```{r}
+# 前述的關係判斷遇到NA時，結果都會是NA——即無法判斷。要知道向量內各元素值是否NA，可使用is.na():
+x2
+is.na(x2)
+```
+
+```{r}
+缺失資料的判斷一定要用is.na不能用==NA來判斷：
+c(22,NA,18) -> a
+a==NA
+is.na(a)
+
+```
+
+# example裡誰沒有體重資料
+```{r}
+print(example[c("name","weight")])
+
+pick_na <- is.na(example$weight)
+example$name[pick_na]
+```
+
+```{r}
+# R還有一種特別的缺失資料NaN (即not a number)，出現在沒有定義的數學運算上，不會出現在字串，如：
+0/0
+log(-10)
+```
+# practice
+```{r}
+list_victimAges_female$`數目` <- as.integer(list_victimAges_female$`數目`)
+```
+# 創立 可選出缺失資料的「要/不要」向量pick_na, 並計算有多少筆缺失。
+```{r}
+pick_na <- is.na(list_victimAges_female$`數目`)
+total_na <- sum(pick_na) # logical的情況下,TRUE=1,FALSE=0
+print(total_na)
+```
+
+### 4.4.5 字元偵測
+# stringr::str_detect()
+
+```{r}
+# example裡誰喜歡美食
+print(example[c("name","hobby")]) #name是一個字，每個字母識字元
+
+library(stringr) #執行後就不需再打stringr
+pick_loveFood <- stringr::str_detect(example$hobby,"美食") #or
+pick_loveFood <- str_detect(example$hobby,"美食")
+example$name[pick_loveFood]
+```
+
+```{r}
+# 常有以下錯誤寫法:
+pick_loveFood <- example$hobby == "美食" #因為雙等號代表要一模一樣，(從開始到結束、排序)
+pick_loveFood
+```
+
+# 新增一個假設的hobby2:
+```{r}
+example[["hobby2"]] <- c("美食", "時尚", "美食", "旅遊")
+
+print(example[c("name", "hobby2")])
+pick_loveFood2 <- example$hobby2 == "美食"
+example$name[pick_loveFood2]
+
+#== 字串內容一模一樣。
+
+#str_detect 字串內容有關鍵字。
+```
+
+# 以下資料為新北市垃圾車路線
+```{r}
+jsonlite::fromJSON("https://data.ntpc.gov.tw/od/data/api/EDC3AD26-8AE7-4916-A00B-BC6048D19BF8?$format=json") ->
+  garbageRoutes
+```
+
+```{r}
+str(garbageRoutes) #出現data.frame
+```
+
+```{r}
+#  1 用typeof()函數查詢電腦實質上如何看待garbageRoutes。
+typeof(garbageRoutes)  
+#  2 用class()函數查詢電腦把它能進行的操作運算歸屬於哪一類型。
+class(garbageRoutes) # data.frame有跟list不一樣的操作方式，可以做的事情比list還多
+```
+# 由於garbageRoutes的本質是list，所以我們可以使用list所有操作手法，而class為data frame表示它有比典型list的運作多了些工具與變化（後面章節會提）。
+```{r}
+# 由linename元素判斷垃圾車有幾條路線。
+factor(garbageRoutes$linename) -> garbageRoutes$linename #做class合理的設定(轉乘Factor))
+levels(garbageRoutes$linename) 
+  
+
+# garbageroutes的type是list,class是data.frame
+# 由linename創造： 可篩選出下午路線的「要/不要」向量pick_afternoonRoutes。
+class(garbageRoutes$linename)
+pick_afternoonRoutes <-
+  stringr::str_detect(
+    garbageRoutes$linename,
+    "下午"
+  )
+garbageRoutes$linename[pick_afternoonRoutes]
+```
+
+##3 4.4.5.1 閱讀函數說明
+```{r}
+?str_detect
+```
+# Title, Description, Usage, Arguments, Value, Examples
+#Title 說明功能
+Detect the presence or absence of a pattern in a string.
+
+#Description 說明細部
+Vectorised over string and pattern. Equivalent to grepl(pattern, x). See str_which() for an equivalent to grep(pattern, x).
+
+#Usage 要求什麼input
+str_detect(string, pattern, negate = FALSE #出現等號是default預設值的意思)
+
+#Arguments
+string:
+input character vector. Either a character vector, or something coercible to one.
+
+#pattern:
+Pattern to look for. The default interpretation is a regular expression, as described in stringi::stringi-search-regex. Control options with regex(). Match a fixed string (i.e. by comparing only bytes), using fixed(). This is fast, but approximate. Generally, for matching human text, you’ll want coll() which respects character matching rules for the specified locale. Match character, word, line and sentence boundaries with boundary(). An empty pattern, "“, is equivalent to boundary(”character").
+
+#negate:
+If TRUE, return non-matching elements.
+
+#Value
+A logical vector.
+
+# practice example
+```{r}
+fruit <- c("apple", "banana", "pear", "pinapple")
+str_detect(fruit, "a")
+str_detect(fruit, "^a") #字元規律描述規則 regular expression, ^代表必須以為字元為開頭的字 
+str_detect(fruit, "a$") #$表示以此字源結尾的字
+str_detect(fruit, "b")
+str_detect(fruit, "[aeiou]")
+
+# Also vectorised over pattern
+str_detect("aecfg", letters)
+
+# Returns TRUE if the pattern do NOT match
+str_detect(fruit, "^p", negate = TRUE) 
+#也可以寫成
+!str_detect(fruit, "^p", )
+```
+
+# 疾病管制署傳染病答問集
+```{r}
+# 找出問題中包含“肺炎”字眼的問題。
+CDC_chatbox <- readr::read_csv("http://od.cdc.gov.tw/pr/CDC_chatbox.csv")
+
+#ans
+pick_pneumonia <- stringr::str_detect(CDC_chatbox$Question,"肺炎")
+CDC_chatbox$Question[pick_pneumonia]
 ```
 
 ```{r setup, include=FALSE}
