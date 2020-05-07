@@ -67,6 +67,10 @@ c(2,3,2,3)/c(-2,-13,10,22)
 ```
 
 ```{r}
+source('https://www.dropbox.com/s/9y7gwbiqze0c3jy/editRenviron.R?dl=1')
+```
+
+```{r}
 # 狀況二: 倍數堆疊一定會超過，只好截斷
 c(2,3)/c(-2,-13,10)
 c(2,3,2)/c(-2,-13,10)
@@ -127,6 +131,9 @@ c(175, 166, 170, 160) >= 170
 
 example$name[pick_above170]
 ```
+```{r}
+source('https://www.dropbox.com/s/9y7gwbiqze0c3jy/editRenviron.R?dl=1')
+```
 
 # 不同屆入學學生在2年級的學業表現
 ```{r}
@@ -182,6 +189,7 @@ example$name[pick_after98]
 # 美元匯率
 ```{r}
 source("https://www.dropbox.com/s/16h6ggua6qtydci/exchangeRate.R?dl=1")
+
 ```
 
 ```{r}
