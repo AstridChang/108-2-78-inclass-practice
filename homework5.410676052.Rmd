@@ -40,22 +40,6 @@ jsonlite::fromJSON("https://www.dropbox.com/s/es19f62rijrd8i7/studentHeight.json
 請將「學年度」及「年齡」都改成ordered factor, levels順序以其文字數值從小排到大。( 答案物件studentHeights本身)
 
 ```{r ans11}
-studentHeights$`學年度` <- as.integer(studentHeights$`學年度`)
-table(studentHeights$`學年度`) 
-studentHeights$`學年度` <- factor(studentHeights$`學年度`,ordered= T)
-levels(studentHeights$`學年度`)
-class(studentHeights$`學年度`)
-
-studentHeights$`年齡` <- as.integer(studentHeights$`年齡`)
-table(studentHeights$`年齡`)
-studentHeights$`年齡` <- factor(studentHeights$`年齡`, ordered = T)
-levels(studentHeights$`年齡`)
-class(studentHeights$`年齡`)
-
-studentHeights
-```
-
-```{r ans11}
 studentHeights$`學年度`<-factor(
   studentHeights$`學年度`,
   ordered=T
@@ -65,28 +49,29 @@ studentHeights$`年齡`<-factor(
   ordered=T
   )
 
-a01<-sort(as.integer(levels(studentHeights$`學年度`)))
-a02<-as.character(a01)
+a1<-sort(as.integer(levels(studentHeights$`學年度`)))
+a2<-as.character(a1)
 
-b01<-sort(as.integer(levels(studentHeights$`年齡`)))
-b02<-as.character(b01)
+b1<-sort(as.integer(levels(studentHeights$`年齡`)))
+b2<-as.character(b1)
 
 studentHeights$`學年度`<-factor(
   studentHeights$`學年度`,
-  a02,
+  a2,
   ordered=T
   )
 studentHeights$`年齡`<-factor(
   studentHeights$`年齡`,
-  b02,
+  b2,
   ordered=T
   )
 
-#check the levels
+
 levels(studentHeights$`學年度`)
 levels(studentHeights$`年齡`)
-studentHeights
 
+
+studentHeights
 ```
 
 
@@ -150,7 +135,13 @@ jsonlite::fromJSON("https://www.dropbox.com/s/bp0w8tjgrhi79x7/sameMajorDifferent
 請寫下「一個」字串的regex字串向量，稱之為realEstateRegex （class character, length=1）,
 
 ```{r ans21}
-# realEstateRegex
+print(differentMajors)
+table(differentMajors)
+realEstateRegex <- "不動產與城鄉環境學系?|不動產城鄉學系?"
+length(realEstateRegex)
+table(str_replace(differentMajors,realEstateRegex,"不動系"))
+
+realEstateRegex
 ```
 
 使得執行以下程序後differentMajors裡屬「不動產與城鄉環境學系（不管何種寫法）」的都會變成"不動系"。這裡regex還有一個限制考驗，就是：「不動產與城鄉環境學系」的十個字都只會出現一次（所以不能寫"(不動系|不動產系|...)"之類的——不、動、系三字出現二次，違規）。(hint: 這題使用regex quantifier裡的`?`會容易很多)
@@ -159,11 +150,17 @@ str_replace(differentMajors,realEstateRegex,"不動系")
 ```
 
 
-
 ### 2.2 factor levels
 直接將differentMajors轉成factor, 並將它的levels存在currentLevels（class character）。（雖然同系有不同叫法而形成好幾個levels，這題不用去整併它。）
 ```{r ans22}
-# currentLevels
+currentLevels <- factor(differentMajors)
+levels(currentLevels)
+class(levels(currentLevels))
+
+currentLevels <- levels(currentLevels)
+
+class(currentLevels)
+currentLevels
 ```
 
 
@@ -171,7 +168,13 @@ str_replace(differentMajors,realEstateRegex,"不動系")
 請寫下「一個」字串的regex（class character, length=1）稱之為bSchoolRegex,
 
 ```{r ans23}
-# bSchoolRegex
+print(differentMajors)
+table(differentMajors)
+bSchoolRegex <- "休閒與運動管理學系?|休運系?|金融與合作經營學系?|金融與合作學系?|金融系?"
+length( bSchoolRegex)
+table(str_replace(currentLevels,bSchoolRegex,"商學院"))
+
+bSchoolRegex
 ```
 
 使得執行以下程序後currentLevels裡屬商學院的系都會變成"商學院"。（其實此題也可以要求第一題的限制，但怕難度太高這題則不設「系名字元不重覆」的限制）
@@ -219,7 +222,9 @@ currentsLevels <- str_replace(currentsLevels,business_regex,"商學院")
 currentsLevels <- str_replace(currentsLevels,social_regex,"社科院")
 currentsLevels <- str_replace(currentsLevels,public_regex,"公共事務學院")
 currentsLevels
-school <- levels(factor(currentsLevels))
+school <- factor(currentsLevels)
+class(school)
+levels(school)
 
 school
 ```
