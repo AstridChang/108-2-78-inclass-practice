@@ -23,6 +23,7 @@ editor_options:
 > 前述存檔與frontmatter要求缺任何一個則扣1分。
 
 請先執以下code chunk, 引入所需packages，答案禁止引用其他套件（Package）。
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, eval=F)
 library(jsonlite); library(lubridate); library(readr); library(stringr); library(purrr); library(magrittr)

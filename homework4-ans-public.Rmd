@@ -50,6 +50,7 @@ str_extract_all(twoNames, pattern)
 執行以下程式會得到金庸小說《天龍八部》第一本書的資料semiGodsSemiDevils，透過`str()`你可以看到資料結構，其中data下面有section（回數）和text（內文）：
 ```{r data2}
 jsonlite::fromJSON("https://www.dropbox.com/s/kv0xa0spa6q5l7q/semiGodsSemiDevils.json?dl=1") -> semiGodsSemiDevils
+str(semiGodsSemiDevils)
 ```
 
 ### 2.1

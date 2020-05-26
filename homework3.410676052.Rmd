@@ -31,9 +31,14 @@ library(jsonlite); library(lubridate); library(readr); library(stringr)
 ## 1 新北市違法雇主
 以下資料來自[新北市違法雇主資料_勞動基準法](https://data.ntpc.gov.tw/od/detail?oid=A3408B16-7B28-4FA5-9834-D147AAE909BF)，執行後可得到badEmployers物件，其底下元素名稱說明可參考來源連結網頁：
 ```{r data1}
-fromJSON("https://data.ntpc.gov.tw/od/data/api/CB6C96C8-D514-42EA-8591-0F4447E79C91?$format=json") -> badEmployers
+jsonlite::fromJSON("https://data.ntpc.gov.tw/api/datasets/A3408B16-7B28-4FA5-9834-D147AAE909BF/json") -> badEmployers
 ```
 
+```{r}
+#factor是什麼
+#舉例
+factor(c(3,1,4,1,5))
+```
 
 
 ### 1.1 違反法條種類
@@ -42,6 +47,12 @@ fromJSON("https://data.ntpc.gov.tw/od/data/api/CB6C96C8-D514-42EA-8591-0F4447E79
 violatedArticles <- levels(factor(badEmployers$law))
 class(violatedArticles) #確認class
 
+# or
+factor(badEmployers$law)-> badEmployers$law
+levels(badEmployers$law)-> violatedArticles
+
+# or table寫法
+names(table(badEmployers$law))
 violatedArticles
 ```
 
@@ -51,6 +62,12 @@ violatedArticles
 table_countsByArticle <- table(badEmployers$law)
 class(table_countsByArticle)
 names(table_countsByArticle)
+
+# or
+table(badEmployers$law) -> table_countsByArticle
+
+# table 用來幹嘛? 把出現次數列出來 舉例
+table(c(3,1,4,1,5))
 
 table_countsByArticle
 ```
@@ -64,6 +81,12 @@ pick <- as.integer(table_countsByArticle)== max(table_countsByArticle)
 mostViolatedArticle <- as.integer(table_countsByArticle[pick])
 class(mostviolatedArticle)
 
+# or
+pick_mostViolatedAct <- table_countsByArticle == max(table_countsByArticle)
+table_countsByArticle[pick_mostViolatedAct] -> mostViolatedArticle
+
+# or (較佳)
+table_countsByArticle[max(table_countsByArticle)] == table_countsByArticle -> mostViolatedArticle
 mostViolatedArticle
 ```
 
@@ -76,14 +99,29 @@ mostViolatedArticle_content <- names(calculated[pick0])
 
 class(mostViolatedArticle_content)
 
+# or
+pick_act32_2_violators <- 
+  badEmployers$law == names(mostViolatedArticle)
+badEmployers$lawContent[pick_act32_2_violators][[1]] -> mostViolatedArticle_content 
+
+# or
+badEmployers[names(mostViolatedArticle) == badEmployers$law,5][[1]] -> mostViolatedArticle_content
+
 mostViolatedArticle_content
 ```
 
 ### 1.5 處份日期最常落在幾月
 找出處份日期最常出現的月份並存在popularSentenceMonth（class character, length=1）：
 ```{r ans15}
-table(badEmployers$dt)
-# popularSentenceMonth
+ymd(badEmployers$dt) -> badEmployers$dt
+month(badEmployers$dt) -> sentenceMonths
+table(sentenceMonths) -> table_sentenceMonths
+pick_highestMonth <- 
+  table_sentenceMonths == max(table_sentenceMonths)
+names(table_sentenceMonths[pick_highestMonth]) -> 
+  popularSentenceMonth
+
+
 ```
 
 ## 2 個人申請
@@ -108,6 +146,7 @@ source("https://www.dropbox.com/s/5oy56om4q0857tt/student10.R?dl=1",encoding = "
 小知識:
 factor是從1開始的整數，沒有0喔。
 ```{r ans2}
+factor(table$`國文`,levels=table$`國文`[c(16:1)],ordered=T) ->chinese # 排序加ordered
 #chinese
 ```
 
@@ -118,6 +157,13 @@ print(students10[c("志願","姓名")])
 
 NTPU <- stringr::str_detect(students10$`志願`,"北大")
 ntpu_namelist <- students10$`姓名`[NTPU]
+
+#or
+students10$`姓名`[str_detect(students10$`志願`,"北大")] -> ntpu_namelist
+
+# or
+pick_ntpu <- str_detect(as.character(students10$`志願`),"北大")
+students10$`姓名`[pick_ntpu] -> ntpu_namelist
 
 ntpu_namelist
 ```
@@ -142,6 +188,22 @@ pick2 <- students10$`英文`+students10$`數學` >=26
 
 ntpu_econtpu_eco <- c("陳依祈", "林溺","蔡玖")
 
+# or (較佳)
+c(as.character(students10$`志願`) == "北大經濟") -> pick_eco
+pick_eco
+c(students10$`國文` >= 12) -> pick_chineseFit
+c(students10$`英文`+students10$`數學` >= 26) -> pick_mathEngFit
+pick_pass1stLevel <- as.logical(pick_eco*pick_chineseFit*pick_mathEngFit)
+students10$`姓名`[pick_pass1stLevel] ->
+  ntpu_econtpu_eco
+
+# or
+(students10$`志願` == "北大經濟")*
+(students10$`國文` >= 12)*
+(students10$`英文` + students10$`數學` >= 26) -> picknew
+as.logical(picknew)
+students10$`姓名`[as.logical(picknew)]
+
 ntpu_econtpu_eco
 ```
 
@@ -155,8 +217,17 @@ ntpu_econtpu_eco
 
 請將榜單文字儲存到名為congrats的答案物件(class為chr)。
 ```{r ans24}
+# wrong
 congrats <- c("恭喜陳依祈同學錄取國立臺北大學經濟系","恭喜林溺同學錄取國立臺北大學經濟系","恭喜蔡玖同學錄取國立臺北大學經濟系")
 class(congrats)
 
+# correct
+ntpu_econtpu_eco[ntpu_econtpu_eco %in% namelist] -> a #確認有誰上榜
+paste("恭喜", a ,"同學錄取國立臺北大學經濟系" ,sep ="") ->congrats
+
+pick_admitted <- students10$`姓名` %in% namelist
+students10$`姓名`[pick_admitted] -> congrats
+paste("恭喜",congrats,"同學錄取國立臺北大學經濟系",sep=" ") ->
+  congrats
 congrats
 ```
