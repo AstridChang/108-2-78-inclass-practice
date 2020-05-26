@@ -490,7 +490,7 @@ map(dataList,~ is.numeric(.x)) -> results
 ```{r}
 map(dataList, is.numeric) %>%
 unlist(.) %>%
-# (.[[1]] > 50) -> pick_big 會出現錯誤
+# (.[[1]] > 50) -> pick_big 會出現錯誤,要加大括號
 
 dataList[.] %>%
 {(.[[1]] > 50)} %>%
