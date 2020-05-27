@@ -56,9 +56,20 @@ names_element1
 
 # factor(atomic vector)
 ```{r ans12}
+# 看資料
 cpiByIncome[[1]]$Item
 cpiByIncome[[2]]$Item
+```
 
+
+```{r ans12}
+# factor(atomic vector)
+listitems[1:3]
+```
+
+
+```{r ans12}
+# 解說unlist
 map(cpiByIncome, ~ .x$Item) -> listitems
 items <- unlist(listitems)
 factor(items) -> items
@@ -67,6 +78,7 @@ items
 
 
 ```{r ans12}
+# final ans
 # 普通寫法
 map(cpiByIncome, ~ .x$Item) -> listitems
 unlist(listitems) -> items
@@ -78,7 +90,10 @@ unlist(.) %>%
 factor(.) -> items
 items
 # or
-items %>% factor(.) -> items
+cpiByIncome %>%
+map(., ~ .x$Item) %>% # 用map對cpiByIncome取出每個元素的Item 值，形成一個list output
+unlist(.) %>% # 接著把list output轉成Vector
+factor(.) -> items # 把vector定義成factor，存在items裡
 
 items
 ```
@@ -98,35 +113,150 @@ items[1:3]
 
 ### 1.3 建立家庭分類
 建立一個family_type物件(class factor), 每個元素分別代表items裡每個元素來於「全體家庭」、「最低20%所得家庭」、「中間60%所得家庭」、「最高20%所得家庭」（「」內為family_type可能level值及它們的排序）
-```{r ans13}
 
-# family_type
+```{r}
+levels(items)
+```
+
+```{r ans13}
+items -> family_type
+levels(family_type) -> currentlevels
+
+str_extract(currentlevels,"[:graph:]+(?=#)") -> newlevels
+
+newlevels -> levels(family_type)
+newlevels
+
+family_type <- factor(family_type,levels= c("全體家庭","最低20%所得家庭","中間60%所得家庭","最高20%所得家庭"))
+
+family_type
 ```
 
 ### 1.4 建立子類
 建立一個subcategory物件(class factor), 每個元素分別代表items裡每個元素來於「一.食物類」、「二.衣著類」、...、「七.雜項類」、「總指數」（「」內為subcategory可能level值, 無需管排序）
 ```{r ans14}
-# subcategory
+items -> subcategory
+levels(subcategory) -> currentlevels
+str_extract(currentlevels, "(?<=#)[:graph:]+(?=\\()") -> newlevels
+
+newlevels -> levels(subcategory)
+
+subcategory
 ```
 
 ### 1.5 levels排序
 將subcategory的levels依「一.食物類」、「二.衣著類」、...、「七.雜項類」、「總指數」排序。（答案物件是subcategory本身）
+```{r}
+levels(subcategory)
+
+# named vector : namedVector2
+namedvector2
+
+factor(
+  subcategory, levels = names(sort(nameVector2))
+) -> subcategory
+
+levels(subcategory)
+
+```
+
 ```{r ans15}
-# subcategory
+# ans #有時間慢慢想再用這個
+levels(subcategory) -> currentLevels
+str_extract(currentLevels, "([:graph:]+(?=\\.)|總指數)") -> chnNumberLevels
+
+chineseNumbers <- "一二三四五六七"
+unlist(str_split(chineseNumbers,"")) -> chnVector
+namedVector <- 1:8
+names(namedVector) <- c(chnVector,"總指數")
+
+chnNumberLevels
+namedVector[chnNumberLevels] -> namedVector2
+names(namedVector2) <- currentLevels
+
+subcategory <- factor(subcategory, levels=names(sort(namedVector2)))
+
+# or 簡單寫法 用factor和levels去排序
+# levels(subcategory) 先看有哪些項目和他們的排序長什麼樣子
+factor(
+  subcategory,
+  levels =  c("一.食物類","二.衣著類","三.居住類","四.交通及通訊類","五.醫藥保健類","六.教養娛樂類","七.雜項類","總指數")
+) -> subcategory
+
+levels(subcategory)
+
+subcategory
 ```
 
 ### 1.6 篩選資料
 由cpiByIncome選出元素值的TYPE為"原始值"的元素，存在答案物件cpiValues ( class list, list of 15104 elements)
 ```{r ans16}
-# cpiValues
+# check
+cpiByIncome[[1]]
+cpiByIncome[[1]]$TYPE=="原始值"
+cpiByIncome[[2]]$TYPE=="原始值"
+cpiByIncome[[3]]$TYPE=="原始值"
+# 出現不斷重複的東西:用map函數
+
+map(cpiByIncome, ~ .x$TYPE == "原始值") -> map_step #得到的函數會是list，，但是要不要向量得到的是向量，所以要用unlist把list拆解成堆疊的向量，如下
+unlist(map_step) -> pick_values
+cpiByIncome[pick_values] -> cpiValues
+
+cpiValues 
+```
+
+```{r}
+# 用pipe串接寫法
+map(cpiByIncome, ~ .x$TYPE == "原始值") %>% # 一一取出元素做比對得到"要/不要"向量
+unlist(.) %>% # 用unlist成為"要/不要"向量
+cpiByIncome[.] -> cpiValues #取出符合條件的元素
+
+cpiValues
 ```
 
 ### 1.7 建立新資料
 由cpiValues建立allCPIdata（class list，list of 4 elements）裡面的4個元素分別是
   
   * TIME_PERIOD：cpiValues$TIME_PERIOD, 由原始值加上日期"01"的日期值，且為Date class。
+```{r}
+cpiValues[[1]]
+paste0(cpiValues[[1]]$TIME_PERIOD,"-01")
+paste0(cpiValues[[2]]$TIME_PERIOD,"-01")
+paste0(cpiValues[[3]]$TIME_PERIOD,"-01")
+```
+
+```{r}
+#重複元素出現，用map
+map(cpiValues,~ paste0(.x$TIME_PERIOD,"-01")) %>%
+# 要記得unlist
+unlist(.) %>% # View(.)
+ymd(.) -> temp
+class(temp)
+
+temp
+```
+
   
   * Item_VALUE：來自cpiValues$Item_VALUE，為class numeric。
+```{r}
+as.numeric(cpiValues[[1]]$Item_VALUE)
+as.numeric(cpiValues[[2]]$Item_VALUE)
+as.numeric(cpiValues[[3]]$Item_VALUE)
+```
+
+```{r}
+# 用map得到的會是list
+# 所以要再用unlist
+map(cpiValues, ~ as.numeric(.x$Item_VALUE))  -> map_step
+unlist(map_step) -> Item_VALUE
+
+
+# pipe寫法
+cpiValues %>%
+map(., ~ as.numeric(.x$Item_VALUE)) %>%
+unlist(.) -> Item_VALUE
+
+```
   
   * family_type
   
@@ -134,21 +264,146 @@ items[1:3]
   
 後兩個均源自前面小題。以上每個元素長度均為15104。
 ```{r ans17}
-# allCPIdata 
+list(
+  TIME_PERIOD=
+    map(cpiValues,~ paste0(.x$TIME_PERIOD,"-01")) %>%
+    unlist(.) %>% 
+    ymd(.),
+  Item_VALUE=
+     cpiValues %>%
+     map(., ~ as.numeric(.x$Item_VALUE)) %>%
+     unlist(.),
+   family_type=family_type[pick_values],
+   subcategory=subcategory[pick_values]
+) -> allCPIdata 
+
+# check
+allCPIdata %>% map(length)
+
+allCPIdata 
 ```
 
 ### 1.8 日期篩選
 留下allCPIdata中介於2011-01-01至2018-12-01的資料存在allCPIdata2（class list，且四個元素的長度只剩3072）
 ```{r ans18}
-# allCPIdata2
+# ans
+pick_date <- (allCPIdata$TIME_PERIOD >= ymd("2011-01-01")& allCPIdata$TIME_PERIOD <= ymd("2018-12-01"))
+map(allCPIdata, ~.x[pick_date]) -> allCPIdata2
+
+allCPIdata2
 ```
 
+```{r}
+# explanation
+list(
+  TIME_PERIOD=allCPIdata$TIME_PERIOD[pick_date],
+  Item_VALUE=allCPIdata$Item_VALUE[pick_date],
+  family_type=allCPIdata$family_type[pick_date],
+  subcategory=allCPIdata$subcategory[pick_date]
+) -> allCPIdata2
+
+```
+
+```{r}
+list(
+  TIME_PERIOD=allCPIdata[[1]][pick_date],
+  Item_VALUE=allCPIdata[[2]][pick_date],
+  family_type=allCPIdata[[3]][pick_date],
+  subcategory=allCPIdata[[4]][pick_date]
+) -> allCPIdata2
+```
+
+```{r}
+map(allCPIdata, ~ .x[pick_date]) -> temp
+
+map(allCPIdata, ~.x[pick_date]) -> allCPIdata2
+```
 
 ### 1.9 不同家庭面臨的物價上漲率
 
 由allCPIdata2建立cpiGrowth_eachFamily（class list, list of 4 elements），裡面有四個元素其名稱為「全體家庭」、「最低20%所得家庭」、「中間60%所得家庭」、「最高20%所得家庭」，而個別元素值分別為此類家庭2018-12-01與2011-01-01的"總指數"CPI比例。
+
+```{r}
+#答案最終要長這個樣子
+list(
+  `全體家庭`=,
+  `最低20%所得家庭`=,
+  `中間60%所得家庭`=,
+  `最高20%所得家庭`=
+) -> cpiGrowth_eachFamily
+```
+
+*留下type為"總指數"的資料
+*分別選出四類家庭資料的
+
 ```{r ans19}
+pick_totalCPI <- allCPIdata2$ subcategory == "總指數"
+allCPIdata2[[1]][pick_totalCPI]
+allCPIdata2[[2]][pick_totalCPI]
+allCPIdata2[[3]][pick_totalCPI]
+allCPIdata2[[4]][pick_totalCPI]
+
+map(allCPIdata2, ~.x[pick_totalCPI]) ->allCPIdata2
 # cpiGrowth_eachFamily
+```
+
+```{r}
+pick_family <- allCPIdata2$family_type == "全體家庭" #(1)
+allCPIdata2$Item_VALUE[pick_family] -> CPIs_selected # (2)
+allCPIdata2$TIME_PERIOD[pick_family] -> Dates_selected
+(Dates_selected == ymd("2011-01-01")) %>%
+  which() -> loc_end
+(Dates_selected == ymd("201-12-01")) %>%
+  which() -> loc_end
+
+pick_allfamily <- allCPIdata2$family_type=="全體家庭"
+# either
+map(allCPIdata2, ~.x[pick_allfamily]) -> allFamily
+# or
+# allCPIdata2$Item_VALUE[pick_allfamily] -> pickedCPIs
+
+last_loc <- length(allFamily$Item_VALUE)
+cpi1 <- allFamily$Item_VALUE[[last_loc]] #2018-12-01 cpi
+cpi2 <- allFamily$Item_VALUE[[1]] #2011-01-01 cpi
+cpi1/cpi2 -> v1
+
+pick_allfamily <- allCPIdata2$family_type=="最低20%所得家庭"
+map(allCPIdata2, ~.x[pick_allfamily]) -> allFamily
+last_loc <- length(allFamily$Item_VALUE)
+cpi1 <- allFamily$Item_VALUE[[last_loc]] #2018-12-01 cpi
+cpi2 <- allFamily$Item_VALUE[[1]] #2011-01-01 cpi
+cpi1/cpi2 -> v2
+
+pick_allfamily <- allCPIdata2$family_type=="中間60%所得家庭"
+map(allCPIdata2, ~.x[pick_allfamily]) -> allFamily
+last_loc <- length(allFamily$Item_VALUE)
+cpi1 <- allFamily$Item_VALUE[[last_loc]] #2018-12-01 cpi
+cpi2 <- allFamily$Item_VALUE[[1]] #2011-01-01 cpi
+cpi1/cpi2 -> v3
+
+pick_allfamily <- allCPIdata2$family_type=="最高20%所得家庭"
+map(allCPIdata2, ~.x[pick_allfamily]) -> allFamily
+last_loc <- length(allFamily$Item_VALUE)
+cpi1 <- allFamily$Item_VALUE[[last_loc]] #2018-12-01 cpi
+cpi2 <- allFamily$Item_VALUE[[1]] #2011-01-01 cpi
+cpi1/cpi2 -> v4
+
+list(
+  v1, v2, v3, v4
+) -> cpiGrowth_eachFamily
+
+c("全體家庭","最低20%所得家庭","中間60%所得家庭","最高20%所得家庭") -> names(cpiGrowth_eachFamily)
+```
+
+```{r}
+# (1) 創造 選家庭類別的"要/不要"向量
+pick_family <- allCPIdata2$family_type == "最低20%所得家庭"
+#(2)選此家庭CPIs
+allCPIdata2$Item_VALUE[pick_family] -> CPIs_selected
+#(3) 計算CPIs比值
+v4 <-
+  CPIs_selected[[loc_end]] / #2018-12-01 cpi
+  CPIs_selected[[loc_start]] # 2011-01-01 cpi
 ```
 
 結語：不知道同學有沒有發現所得越低的家庭，其面臨的物價水準上漲速度較快。希望在資料探索的過程中你有發現社會經濟面的一些問題，找到原因和解決問題的方法。

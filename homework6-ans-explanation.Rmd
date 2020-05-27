@@ -350,6 +350,7 @@ c("全體家庭","最低20%所得家庭","中間60%所得家庭","最高20%所�
 ```
 
 ```{r}
+#(1) 創造 選家庭類別的"要/不要"向量
 levels(allCPIdata2$family_type) -> familyLevels
 
 allCPIdata2$family_type==familyLevels[[1]] #"全體家庭"
@@ -359,7 +360,7 @@ allCPIdata2$family_type==familyLevels[[4]] #"最高20%所得家庭"
 
 map(familyLevels, ~ allCPIdata2$family_type==.x) -> pick_family 
 
-
+#(2)選此家庭cpis
 # pick_family[[1]]
 allCPIdata2$Item_VALUE[pick_family[[1]]] #"全體家庭" cpi
 allCPIdata2$Item_VALUE[pick_family[[2]]] #"最低20%所得家庭" cpi
@@ -368,6 +369,7 @@ allCPIdata2$Item_VALUE[pick_family[[4]]] #"最高20%所得家庭" cpi
 
 map(pick_family, ~ allCPIdata2$Item_VALUE[.x]) -> temp
 
+#(3) 計算CPIs 比值
 temp[[1]][[96]]/temp[[1]][[1]]
 temp[[2]][[96]]/temp[[2]][[1]]
 temp[[3]][[96]]/temp[[3]][[1]]
@@ -375,10 +377,21 @@ temp[[4]][[96]]/temp[[4]][[1]]
 
 
 map(temp, ~ .x[[96]]/.x[[1]]) -> cpiGrowth_eachFamily
+cpiGrowth_eachFamily
 ```
 
+```{r}
+# ans
+levels(allCPIdata2$family_type) -> familyLevels
+map(familyLevels, ~ allCPIdata2$family_type == .x) -> pick_family
+map(pick_family, ~allCPIdata2$Item_VALUE[.x]) -> CPIs_selected
+map(CPIs_selected, ~ .x[[96]]/.x[[1]]) -> cpiGrowth_eachFamily
+
+names(cpi_eachFamily) <- familyLevels
+```
 
 ```{r}
+# ans pipe
 levels(allCPIdata2$family_type) %>%
   map(~allCPIdata2$family_type==.x) -> pick_family
 names(pick_family) <- levels(allCPIdata2$family_type)
@@ -392,7 +405,7 @@ last_loc <- length(cpi_eachFamily$`中間60%所得家庭`)
 cpi_eachFamily %>%
   map(~.x[[last_loc]]/.x[[1]]) -> cpiGrowth_eachFamily
 
-# cpiGrowth_eachFamily
+cpiGrowth_eachFamily
 ```
 
 結語：不知道同學有沒有發現所得越低的家庭，其面臨的物價水準上漲速度較快。希望在資料探索的過程中你有發現社會經濟面的一些問題，找到原因和解決問題的方法。
