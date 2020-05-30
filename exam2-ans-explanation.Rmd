@@ -113,10 +113,11 @@ levels(tpe_highSchools)
 請完成可捕捉到字尾「中、高、高級中學」的regex，但
 「高、級、中、學」這4個字個別只能在regex出現「不超過一次」
 ```{r ans14}
+#字尾出現 加$
 regex_hsTitle <- 
   "[高級中學]+$"
 
-# regex_hsTitle
+regex_hsTitle
 ```
 
 完成後請執行以下程序，正確答案下：
@@ -162,7 +163,7 @@ data228有四個元素：
 
 
 ```{r}
-data228$檔號[[1]]
+data228$`檔號`[[1]]
 ```
 
 
@@ -171,7 +172,7 @@ data228$檔號[[1]]
   * data228$年：由檔號取出的民國年份（class integer）
   
 ```{r ans21}
-data228$檔號 %>%
+data228$`檔號` %>%
   str_split("/") -> split_docCode
 ```
 
@@ -185,7 +186,7 @@ split_docCode[[3]][[1]]
 ```{r}
 map(split_docCode,~ .x[[1]]) -> list_docNumbers
 unlist(list_docNumbers) -> docNumbers
-data228$全宗名編號 <- 
+data228$`全宗名編號` <- 
   factor(docNumbers)
 ```
 
@@ -199,13 +200,13 @@ data228$年 <-
 ```{r}
 map(split_docCode, ~.x[[1]]) %>% 
   unlist() %>%
-  factor() -> data228$全宗名編號
+  factor() -> data228$`全宗名編號` 
 
 map(split_docCode, ~.x[[2]]) %>%
   unlist() %>%
   as.integer()-> data228$年
 
-# data228[c("全宗名編號","年")]
+data228[c("全宗名編號","年")]
 ```
 
 ### 2.2 人犯名單
@@ -223,7 +224,8 @@ data228$檔號[pick_document] %>%
 data228$個人名稱[pick_document] %>%
   unique() -> victims
 
-# victims
+length(victims)
+victims
 ```
 
 ### 2.3 重要人物
