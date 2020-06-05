@@ -334,7 +334,7 @@ courseStructure$應修系級 %>%
 courseStructure$科目名稱[pick_courses] %>%
   unique() -> econ101junior
 
-# econ101junior
+ econ101junior
 ```
 
 
@@ -400,6 +400,7 @@ list(
 
 
 ```{r}
+# 第二個寫法 map
 grades <- c(1,2,3,4)
 # entranceYear+1-1學年, major1
 unique(courseStructure$科目名稱[
