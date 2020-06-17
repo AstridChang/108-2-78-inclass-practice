@@ -53,6 +53,13 @@ tpe_highSchools <- factor(
 # tpe_highSchools
 ```
 
+```{r}
+levels(tpe_highSchools)
+tpe_highSchools <- factor(
+  tpe_highSchools, levels = c("臺北市立第一女中","台北市立第一女子高級中學","中山女中","中山女高", "台北市立中山女中", "臺北市立中山女子高級中學","國立政大附中", "國立政治大學附屬高級中學")
+)
+```
+
 ### 1.2 新增
 在tpe_highSchools裡新增10筆"北一女"（不可以用"臺北市立第一女中"或"臺北市立第一女子高級中學"別名來新增）
 
