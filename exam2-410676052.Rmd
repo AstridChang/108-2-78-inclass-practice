@@ -92,7 +92,8 @@ levels(tpe_highSchools)
 請完成可捕捉到字尾「中、高、高級中學」的regex，但
 「高、級、中、學」這4個字個別只能在regex出現「不超過一次」
 ```{r ans14}
-
++++++
+  
 "高?級?中?學?$" -> regex_hsTitle
 regex_hsTitle
 
