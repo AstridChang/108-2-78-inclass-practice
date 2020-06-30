@@ -72,7 +72,7 @@ map(1:5, ~{sampleData[[.]][[1]]})
 
 ```{r}
 eggs <- rep("雞蛋x1", 8)
-
+library(stringr)
 fryEgg <- function(egg){
   str_replace(egg, "雞蛋", "荷包蛋")
 }
@@ -96,7 +96,7 @@ map(1:8, ~{fryEgg(eggs[[.]])}) -> friedEggs2
 ```{r}
 grade <- c(45, 74, NA)
 
-i<-3
+i<-1 #可改成2 3 試試看
 
 grade_i <- grade[[i]]
 if(!is.na(grade_i)){
@@ -188,8 +188,9 @@ toast_withEggHam <- function(toast=NULL, egg=NULL, ham=NULL){
   "火腿蛋三明治"
 }
 
+# 串接寫法
 # 土司、火腿、蛋 第一份出列
-1 %>% {toast_withEggHam(toast=toast[[.]], egg=eggs[[.]], ham=ham[[.]])}
+1 %>% {toast_withEggHam(toast=toast[[.]], egg=eggs[[.]], ham=ham[[.]])} 
 # 土司、火腿、蛋 第二份出列
 2 %>% {toast_withEggHam(toast=toast[[.]], egg=eggs[[.]], ham=ham[[.]])}
 # 土司、火腿、蛋 第三份出列
@@ -345,7 +346,7 @@ get_courses(academicYears[[4]], allGrades[[4]], courseStructure)
 
 ### 5.4.3 for loop
 ```{r}
-output <- vector("{type}", length={len})
+zoutput <- vector("{type}", length={len})
 for(.x in {sequence}){
   {body}
 }
@@ -403,6 +404,35 @@ for(.x in 1:4){
 ```
 
 # 若internal dispatching sequence的長度是對應到某個物件元素個數，如上面1:4是對應academicYears（亦對應allGrades），則1:4可用seq_along(academiYears)取代。
+```{r}
+# internal dispatching
+get_courses(academicYears[[1]], 
+                allGrades[[1]], 
+                courseStructure)
+get_courses(academicYears[[2]], 
+                allGrades[[2]], 
+                courseStructure) 
+get_courses(academicYears[[3]], 
+                allGrades[[3]], 
+                courseStructure)
+get_courses(academicYears[[4]], 
+                allGrades[[4]], 
+                courseStructure)
+
+1 %>% get_courses(academicYears[[.]], 
+                allGrades[[.]], 
+                courseStructure)
+2 %>% get_courses(academicYears[[.]], 
+                allGrades[[.]], 
+                courseStructure) 
+3 %>% get_courses(academicYears[[.]], 
+                allGrades[[.]], 
+                courseStructure)
+4 %>% get_courses(academicYears[[.]], 
+                allGrades[[.]], 
+                courseStructure)
+```
+
 
 # 火腿蛋三明治
 ```{r}
@@ -428,7 +458,7 @@ map(1:10,
 ```{r}
 output <- vector("character", 10)
 for(.x in 1:10){
-  toast_withEggHam(toast=toast[[.x]], egg=eggs[[.x]], ham=ham[[.x]]) -> output[[.x]]
+  toast_withEggHam(toast=toast[[.x]], egg=eggs[[.x]], ham=ham[[.x]]) -> output[[.x]] #存回
 }
 ```
 
@@ -447,6 +477,15 @@ print(a)
 # output: .x到10最後算完的值。
 ```{r}
 sum <- 0
+sum <- sum + a[[1]]
+sum <- sum + a[[2]]
+sum <- sum + a[[3]]
+.
+.
+.
+sum <- sum + a[[10]]
+
+sum <- 0
 for(.x in 1:10){
   sum <- sum+a[[.x]]
 }
@@ -458,6 +497,8 @@ print(sum)
 每次抽一個介於0到100的數字（抽出放回）抽10次，但每次必需是3的倍數才留下來。
 ```{r}
 output <- c()
+
+# .x=1時 
 for(.x in 1:10){
   new <- sample(0:100,1)
   if(new %% 3==0){
@@ -490,6 +531,14 @@ for(.x in seq_along(collectionHWs)){
     next
   } 
   
+  
+# 第一個學生
+  nameVector[[1]] <-
+    collectionHWs[[1]][[1]]
+  studentAns <- collectionHWs[[1]][[2]]
+  
+  
+  
   # 改題部份
   if(identical(studentAns, correctAns)){
     output[[.x]] <- 10
@@ -503,12 +552,29 @@ names(output) <- nameVector
 
 print(output)
 ```
+```{r}
+seq_along(collectionHWs)
+```
+
+
+
 # 將body的改題部份另外寫成grade(studentAns, correctAns)函數，讓它改完後回傳分數值，並重寫上面迴圈使用你的grade函數。
 
 ### 5.4.4 while loop
 有時我們面臨sequence長度未知，如擲一銅板直到出現5次正面才停。
 ```{r}
-sum <- 0
+sum <- 0 # 得到幾個正面
+count <- 0 #計算擲了幾次
+# first toss
+count <- count+1 # 計數器+1
+newToss <- sample(c("正","反")),1, replace = T)
+if(newToss == "正") {
+  sum <- sum + 1
+}
+
+
+
+
 for(i in 1:10){
   newToss <- sample(c("正","反"), 1, replace=T)
   if(newToss == "正"){

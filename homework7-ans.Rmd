@@ -38,6 +38,10 @@ library(readr); library(stringr); library(purrr); library(magrittr); library(lub
 # surface_A
 ```
 
+```{r m11}
+
+```
+
 ### 1.2 立方體表面積計算機
 請寫一個叫做surface_cube的function，它的功能是在你輸入長寬高後能自動回傳表面積的值，比如輸入surface_cube(20,10,15)，執行結果應該出現和你1.1計算出來一樣值。
 ```{r ans12}
@@ -47,6 +51,10 @@ surface_cube <- function(x,y,z){
 }
 
 # surface_cube
+```
+
+```{r m12}
+
 ```
 
 ## 2 口罩實名制
@@ -66,6 +74,10 @@ Mask$身分證字號[[1]] %>%
 # `1st_odd_or_even`
 ```
 
+```{r m21}
+
+```
+
 ### 2.2 身分證末碼判斷function
 請寫一個叫做odd_or_even的function，它的功能是在你輸入身分證字號後能自動回傳其末碼屬於單數還是雙數(單雙數表示法同2.1)，比如輸入
 odd_or_even(Mask$身分證字號[[1]])，執行結果應該出現和你2.1計算出來的一樣。
@@ -80,6 +92,10 @@ odd_or_even <- function(id){
 # odd_or_even
 ```
 
+```{r m22}
+
+```
+
 ### 2.3 口罩實名制1.0—購買口罩日期
 在lubridate中`today()`可以查詢今天的日期；查詢某日為一周中的第幾天的方式則為`wday()`，其中1代表星期天、7代表星期六，以下資料為其對照表。
 ```{r data23}
@@ -88,6 +104,7 @@ data.frame(
   number = c(1:7)
 ) -> weekday_chart
 ```
+
 
 在口罩實名制1.0中，規定「身分證字號末碼雙號者（0、2、4、6、8）可於每週二、四、六購買；單號者（1、3、5、7、9）可於每週一、三、五購買；週日則開放全民皆可購買(摘自wiki)」，試判斷Mask裡的第一個身分證字號在實名制1.0之下，下一次可購買口罩的日期(含本日)，並將結果存在1st_next_date(class Date)。
 
@@ -109,6 +126,10 @@ as.numeric(
 # `1st_next_date`
 ```
 
+```{r m23}
+
+```
+
 ### 2.4 口罩實名制1.0—口罩購買日期查詢機
 請寫一個叫做next_date的function，它的功能是在你輸入身分證字號後能自動回傳該身份證字號下次可購買口罩的日期(含本日)並加上星期，表示格式為"年-月-日,星期幾"，比如助教今天2020/06/09輸入next_date(Mask$身分證字號[[1]])，執行結果應該出現"2020-06-09,星期二"。
 如果R環境設定為英文則會出現"2020-06-09,Tuesday"。
@@ -124,6 +145,10 @@ next_date <- function(id){
 }
 next_date(Mask$身分證字號[[1]])
 # next_date
+```
+
+```{r m24}
+
 ```
 
 ## 3. 各系課程規劃
@@ -159,37 +184,35 @@ list(
 
 
 ```{r ans31}
-get_courses <- function(entranceYear,major){
-  entranceYear <- as.character(entranceYear)
-  
-  if(!exists("courseStructure")){
-    jsonlite::fromJSON("https://www.dropbox.com/s/7myzzdnoor21hye/courseStructure2.json?dl=1") -> courseStructure
-    SOAR::Store(courseStructure)
-  }
-  
-  library(dplyr)
-  library(stringr)
-  library(purrr)  
-  paste0(major,1:4) -> majorAllGrades
-  map(majorAllGrades,
-      ~(
-        courseStructure$學年 == entranceYear &
-        str_detect(courseStructure$應修系級, .x))
-      ) -> pick_courses
-  
-  map(pick_courses,  
-      ~unique(courseStructure$科目名稱[.x])) -> courseNamesAllGrades
-  names(courseNamesAllGrades) <- paste("year", 1:4, sep="")
-  
-   return(courseNamesAllGrades)
+get_courses <- function(entranceYear, major){
+
+seq1 <- entranceYear + 0:3
+seq1 <- as.character(seq1)
+seq2 <- paste0(major, 1:4)
+
+map(seq2,  ~str_detect(courseStructure$應修系級, .x)) -> pick_majorGrade
+
+map(seq1, ~courseStructure$學年==.x ) -> pick_years
+
+map(1:4, 
+    ~unique(courseStructure$科目名稱[
+       pick_majorGrade[[.x]] & pick_years[[.x]]
+])) -> courses_byGrade
+
+# courses_byGrade %>% str(max.level=1)
+
+names(courses_byGrade) <- paste0("year", 1:4)
+
+ return(courses_byGrade)
 }
 
-entranceYear <- "103"
+entranceYear <- 103
 major <- "經濟系"
 get_courses(entranceYear, major)
 
 # get_courses
 ```
+
 
 ### 3.2 使用自創函數
 
@@ -228,6 +251,7 @@ entranceYears %>%
   list_major3_allYears # 社工系
 
 ```
+
 
 其中？=1代表經濟系，2代表社會系，3代表社工系，每個list會有4個元素分別代表100-104入學年，而每個入學年元素本身又是一個list of 4，代表該入學年學生在「一～四」年級的系規劃課程科目稱種類—— 即執行`str(list_major1_allYears)`會看到：
 
@@ -294,27 +318,85 @@ majors %>%
   * 「year2, year3, year4」如year1, 分別是100-103學年入學「二、三、四」年級的科目種類「數目」，即該年級可供學生選的不同科目名稱有幾個。
   
 ```{r ans34}
-list_entranceYears <- 100:103
-map(list_entranceYears,
-    get_courses, major) -> list_coursesAllEntranceYears
+get_coursesAllYears(
+  100:103, "經濟系"
+) -> list_econ100_103
+names(list_econ100_103) <- paste0("y", 100:103)
 
-list_coursesAllEntranceYears[[1]] %>% map(~length(.x)) 
-
-map(list_coursesAllEntranceYears, ~.x  %>% map(~length(.x)) ) -> list_coursesCount
-
-list_coursesCount %>% map( ~.x$year1) %>% unlist -> year1
-
-get_numberOfYear <- function(i){
-  list_coursesCount %>% map( ~.x[[i]]) %>% unlist -> year1
-  return(year1)
+count_courses <- function(grade){
+  map_int(list_econ100_103,
+    ~length(.x[[grade]]))
 }
 
-map(1:4, get_numberOfYear) -> list_coursesCountAllYears
-names(list_coursesCountAllYears) <- paste0("year", 1:4, sep="")
+map(1:4, ~count_courses(.x)) -> allYears
 
-list(
-  entranceYear=100:103
-) %>% append(list_coursesCountAllYears) -> list_econCourseCounts
+list_econCourseCounts <- allYears
+names(list_econCourseCounts) <- paste0("year", 1:4)
+list_econCourseCounts$entranceYear <- 100:103
+
+list_econCourseCounts
+```
+
+```{r reference}
+get_coursesAllYears(
+  100:103, "經濟系"
+) -> list_econ100_103
+names(list_econ100_103) <- paste0("y", 100:103)
+
+# ## expression1
+# length(list_econ100_103$y100$year1)
+# length(list_econ100_103$y101$year1)
+# length(list_econ100_103$y102$year1)
+# length(list_econ100_103$y103$year1)
+# 
+# ## expression2
+# length(list_econ100_103[[1]][[1]])
+# length(list_econ100_103[[2]][[1]])
+# length(list_econ100_103[[3]][[1]])
+# length(list_econ100_103[[4]][[1]])
+# 
+# ## expression3
+# map(list_econ100_103,
+#     ~length(.x[[1]])) -> year1
+# unlist(year1) -> year1
+# 
+# ## expression4
+# map_int(list_econ100_103,
+#     ~length(.x[[1]])) -> year1
+# 
+# map_int(list_econ100_103,
+#     ~length(.x[[2]])) -> year2
+# 
+# map_int(list_econ100_103,
+#     ~length(.x[[3]])) -> year3
+# 
+# map_int(list_econ100_103,
+#     ~length(.x[[4]])) -> year4
+
+## expression5
+count_courses <- function(grade){
+  map_int(list_econ100_103,
+    ~length(.x[[grade]]))
+}
+# count_courses(1)-> year1
+# count_courses(2)-> year2
+# count_courses(3)-> year3
+# count_courses(4)-> year4
+map(1:4, ~count_courses(.x)) -> allYears
+
+
+# list(
+#   entranceYears= 100:103,
+#   year1= allYears[[1]],# c(100-103),
+#   year2= allYears[[2]], #c(100-103),
+#   year3= allYears[[3]],
+#   year4= allYears[[4]]
+# )-> list_econCourseCounts
+
+list_econCourseCounts <- allYears
+names(list_econCourseCounts) <- paste0("year", 1:4)
+list_econCourseCounts$entranceYear <- 100:103
+
 
 # list_econCourseCounts
 ```
